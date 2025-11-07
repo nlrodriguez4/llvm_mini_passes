@@ -12,6 +12,8 @@ set(LLVM_TUTOR_PLUGINS
     DuplicateBB
     OpcodeCounter
     MergeBB
+    SimpleLICM
+    DerivedInductionVar
     )
 
 set(StaticCallCounter_SOURCES
@@ -36,7 +38,10 @@ set(OpcodeCounter_SOURCES
   OpcodeCounter.cpp)
 set(MergeBB_SOURCES
   MergeBB.cpp)
-
+set(SimpleLICM_SOURCES
+  SimpleLICM.cpp)
+set(DerivedInductionVar_SOURCES
+  DerivedInductionVar.cpp)
 # CONFIGURE THE PLUGIN LIBRARIES
 # ==============================
 foreach( plugin ${LLVM_TUTOR_PLUGINS} )
