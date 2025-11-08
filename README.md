@@ -1,28 +1,4 @@
-Build Instructions
-------------------
-1) Replace CMakeLists from llvm-tutor/lib with the newly provided one (so sources are defined)
-
-2) Add the .cpp files to llvm-tutor/lib
-
-2) Add the .c input files to llvm-tutor/inputs
-
-3) Rebuild llvm-tutor to create:
-     build/lib/libSimpleLICM.so
-     build/lib/libDerivedInductionVar.so
-
-
-
-
-
-Generate LLVM IR from C tests
------------------------------
-Use clang to get LL files:
-
-   clang-21 -O0 -Xclang -disable-O0-optnone -S -emit-llvm inputs/input_for_div.c -o input_for_div.ll
-   clang-21 -O0 -Xclang -disable-O0-optnone -S -emit-llvm inputs/input_for_licm.c -o input_for_licm.ll
-
-
-
+(Test now)
 
 A) SimpleLICM
 --------------
@@ -54,5 +30,32 @@ diff -u before.ll after.ll | sed -n '1,200p'
 Check output:
 - Terminal prints "[iv-elim] removed PHI ..."
 - In `out/div.after.ll`, derived PHIs should be gone.
+
+
+(Notes)
+
+Build Instructions
+------------------
+1) Replace CMakeLists from llvm-tutor/lib with the newly provided one (so sources are defined)
+
+2) Add the .cpp files to llvm-tutor/lib
+
+2) Add the .c input files to llvm-tutor/inputs
+
+3) Rebuild llvm-tutor to create:
+     build/lib/libSimpleLICM.so
+     build/lib/libDerivedInductionVar.so
+
+
+
+
+
+Generate LLVM IR from C tests
+-----------------------------
+Use clang to get LL files:
+
+   clang-21 -O0 -Xclang -disable-O0-optnone -S -emit-llvm inputs/input_for_div.c -o input_for_div.ll
+   clang-21 -O0 -Xclang -disable-O0-optnone -S -emit-llvm inputs/input_for_licm.c -o input_for_licm.ll
+
 
 
