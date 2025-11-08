@@ -1,4 +1,4 @@
-(REQUIREMENTS: LLVM-21 & CMAKE 3.2)
+!!! (REQUIREMENTS: LLVM-21 & CMAKE 3.2)
 
 A) SimpleLICM
 --------------
@@ -17,13 +17,11 @@ Now, we apply the pass --> saved to after.ll:
 
 /usr/lib/llvm-21/bin/opt -load-pass-plugin build/lib/libDerivedInductionVar.so -passes='function(mem2reg,loop-simplify,derived-iv)' input_for_div.ll -o after.ll
 
-Finally, using diff to verify changes between before.ll and after.ll:
+Finally, using grep to verify changes between before.ll and after.ll:
 
-diff -u before.ll after.ll | sed -n '1,200p'
+grep -n 'phi' before.ll (168 phi instructions based on test cases)
+grep -n 'phi' after.ll (0 phi instructions after running the pass)
 
-- Terminal prints "[iv-elim] removed PHI ..."
-- In `out/div.after.ll`, derived PHIs should be gone.
-
-
-**Test Cases:**
+C) Test Cases
+-----------------------
 Generated using ChatGPT as C programs (input_for_div.c & input_for_licm.c)
