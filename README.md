@@ -1,55 +1,58 @@
-mkdir -p build
-cd build
-cmake -DLLVM_DIR=/usr/lib/llvm-21/lib/cmake/llvm ..
-cmake --build . -j
+Build Instructions
+------------------
+1) Replace CMakeLists from llvm-tutor/lib with the newly provided one (so sources are defined)
 
-This produces:
+2) Add the .cpp files to llvm-tutor/lib
 
-build/lib/libAffineRecurrence.so
-build/lib/libSimpleLICM.so
-build/lib/libDerivedInductionVar.so
+2) Add the .c input files to llvm-tutor/inputs
 
--------------------------------------
-
-Test Inputs: Generate .ll from C files
-
-clang-21 -O0 -Xclang -disable-O0-optnone -S -emit-llvm <c files> -o <c file with ll extension instead>
-
-Do this for test files (input_for_div, input_for_licm)
-
--------------------------------------
-
-SimpleLICM Command
-
-opt -S
--load-pass-plugin build/lib/libSimpleLICM.so
--passes='function(mem2reg,loop-simplify,loop(simple-licm))'
-<your ll file>
-
-The pass prints “Hoisting” lines for each instruction it moves.
-
--------------------------------------
-
-DerivedInductionVar command
+3) Rebuild llvm-tutor to create:
+     build/lib/libSimpleLICM.so
+     build/lib/libDerivedInductionVar.so
 
 
-opt -S
--load-pass-plugin build/lib/libDerivedInductionVar.so
--passes='function(mem2reg,loop-simplify,derived-iv)'
-<your ll file>
 
 
-Stderr prints each derived IV found and when it’s removed
 
-Using diff before vs after to help verify:
+Generate LLVM IR from C tests
+-----------------------------
+Use clang to get LL files:
 
-opt -S -passes='function(mem2reg,loop-simplify,instnamer)'
-tests/input_for_div.ll -o before.ll
+   clang-21 -O0 -Xclang -disable-O0-optnone -S -emit-llvm inputs/input_for_div.c -o input_for_div.ll
+   clang-21 -O0 -Xclang -disable-O0-optnone -S -emit-llvm inputs/input_for_licm.c -o input_for_licm.ll
 
-opt -S
--load-pass-plugin build/lib/libDerivedInductionVar.so
--passes='function(mem2reg,loop-simplify,derived-iv,instnamer)'
-tests/input_for_div.ll -o after.ll
+
+
+
+A) SimpleLICM
+--------------
+Runs the LICM pass to hoist invariant code from loops.
+
+opt -load-pass-plugin ./build/lib/libSimpleLICM.so -passes='function(mem2reg,loop-simplify,loop(simple-licm))'   -S input_for_licm.ll -o - 2>&1
+
+- "Hoisting:" messages in the terminal
+- Can also view `simple_licm_demo.ll` to see instructions moved into preheader.
+
+
+
+
+
+B) DerivedInductionVar
+-----------------------
+First do the test without applying the pass --> save to before.ll:
+
+opt -S -passes='function(mem2reg,loop-simplify,instnamer)' input_for_div.ll -o before.ll
+
+Then do the same thing but apply the pass --> save to after.ll:
+
+opt -load-pass-plugin build/lib/libDerivedInductionVar.so -passes='function(mem2reg,loop-simplify,derived-iv)' input_for_div.ll -o after.ll
+
+Now use to diff to verify changes between before.ll and after.ll:
 
 diff -u before.ll after.ll | sed -n '1,200p'
+
+Check output:
+- Terminal prints "[iv-elim] removed PHI ..."
+- In `out/div.after.ll`, derived PHIs should be gone.
+
 
